@@ -28,5 +28,22 @@ services:
     # would fail with EADDRINUSE because the wildcard already covers it.
     ports: !override
       - "127.0.0.1:${BACKEND_PORT:-8200}:8000"
+    # Inject the VM-specific .env.vm into the container instead of dev's .env.
+    # --env-file on the CLI only affects YAML variable substitution; this is
+    # what actually gets exported to the running process.
+    env_file: !override
+      - .env.vm
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+
+  celery_worker:
+    env_file: !override
+      - .env.vm
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+
+  celery_beat:
+    env_file: !override
+      - .env.vm
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.prod
