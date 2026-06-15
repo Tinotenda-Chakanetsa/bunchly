@@ -22,7 +22,11 @@ services:
   backend:
     # Bind explicitly to the loopback. Funnel proxies 127.0.0.1:${BACKEND_PORT}
     # so we deliberately keep this off 0.0.0.0.
-    ports:
+    # !override replaces the inherited ports list instead of appending to it.
+    # Without it, Compose would try to bind BOTH 0.0.0.0:${BACKEND_PORT} (from
+    # docker-compose.yml) AND 127.0.0.1:${BACKEND_PORT}, and the second bind
+    # would fail with EADDRINUSE because the wildcard already covers it.
+    ports: !override
       - "127.0.0.1:${BACKEND_PORT:-8200}:8000"
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.prod
