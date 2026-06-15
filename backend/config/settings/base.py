@@ -261,8 +261,14 @@ SPECTACULAR_SETTINGS = {
 # ---------------------------------------------------------------------------
 # CORS
 # ---------------------------------------------------------------------------
+from corsheaders.defaults import default_headers  # noqa: E402
+
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_CREDENTIALS = True
+# The frontend attaches X-Tenant-ID on every request to pick the active
+# tenant; django-cors-headers' default header allowlist doesn't include
+# custom names, so the browser would reject the preflight without this.
+CORS_ALLOW_HEADERS = (*default_headers, "x-tenant-id")
 
 # ---------------------------------------------------------------------------
 # Internationalisation
