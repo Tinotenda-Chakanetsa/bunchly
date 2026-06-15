@@ -1,0 +1,105 @@
+/* Prototype design tokens & component classes — verbatim from the
+   Bunchly Daybreak redesign. Keeps the look identical while we build
+   the real React/TS app on top. @import must precede @tailwind. */
+@import "./tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- Dark mode overrides ----------
+   The prototype was light-only. Mapping the same CSS variables onto
+   dark surfaces gives every component theme support without touching
+   them — toggle by adding `class="dark"` on <html>. */
+.dark {
+  --bg: #0F141C;
+  --card: #161D28;
+  --card-2: #1B2330;
+  --sidebar-bg: #11161F;
+  --sidebar-hover: rgba(255, 255, 255, 0.04);
+  --hairline: #232C3A;
+  --hairline-2: #1B2330;
+
+  --text: #E6EAF2;
+  --text-2: #B3BBCB;
+  --text-3: #7D8699;
+  --text-4: #525C6E;
+
+  --ink: #E6EAF2;
+  --ink-2: #F3F6FB;
+  --ink-3: #FFFFFF;
+
+  --mist: #1B2330;
+  --positive-soft: rgba(31, 138, 91, 0.18);
+  --warn-soft: rgba(178, 106, 0, 0.18);
+  --danger-soft: rgba(197, 48, 48, 0.18);
+  --info-soft: rgba(47, 110, 219, 0.18);
+  --yellow-soft: rgba(252, 203, 13, 0.18);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #2C3645;
+}
+
+.dark .card,
+.dark .table-wrap,
+.dark .kpi-strip,
+.dark .list,
+.dark .modal,
+.dark .sidebar-user,
+.dark .date-range,
+.dark .role-switch button.active,
+.dark .topbar {
+  background: var(--card);
+  border-color: var(--hairline);
+}
+
+.dark .topbar .search input,
+.dark .input,
+.dark .select,
+.dark .textarea,
+.dark .toolbar-search input {
+  background: var(--card-2);
+  border-color: var(--hairline);
+  color: var(--text);
+}
+
+.dark .nav-item.active {
+  background: var(--card-2);
+}
+
+.dark .table th { background: var(--card-2); color: var(--text-3); }
+.dark .badge { background: var(--card-2); border-color: var(--hairline); color: var(--text-2); }
+.dark .btn-outline { background: var(--card-2); border-color: var(--hairline); color: var(--text); }
+
+/* In dark mode --ink-3 collapses to white, which breaks every place it was
+   used as a background (button, badge, pill tab, tinted card, brand mark,
+   toast). Repaint those surfaces with a real dark tone so foreground text
+   stays readable. */
+.dark .btn-ink { background: #2C3645; color: #fff; }
+.dark .btn-ink:hover { background: #3A465A; }
+.dark .badge-ink { background: #2C3645; color: #fff; }
+.dark .card.tinted-ink { background: #1B2330; color: #E6EAF2; }
+.dark .tabs.pill button.active { background: #2C3645; color: #fff; }
+
+/* Toast: success toast was painted with --ink-3 which becomes white in
+   dark mode (white on white). Pin it to a real dark surface so the
+   white check + text are readable in both themes. */
+.toast-success { background: #141E2C; }
+.dark .toast-success { background: #2C3645; }
+
+/* Hero card: keep it dark in both modes but lift it slightly above the
+   dark page background so it still reads as an elevated surface. */
+.dark .hero-card {
+  background: linear-gradient(140deg, #1B2330 0%, #232C3A 60%, #2C3F5E 100%);
+}
+
+/* Avatar uses a hard-coded white border which leaves a glaring halo on
+   dark surfaces. Match the surrounding card instead. */
+.dark .avatar { border-color: var(--card); }
+
+/* Notification dot ring should match the topbar, not stay white. */
+.dark .topbar .icon-btn .dot { border-color: var(--card); }
+
+/* Light theme background hint when no class is set */
+html { background: var(--bg); }

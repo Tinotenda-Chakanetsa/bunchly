@@ -1,0 +1,28 @@
+# Bunchly — Tailscale VM deployment overlay.
+#
+# Use:
+#   docker compose -f docker-compose.yml -f docker-compose.vm.yml \
+#     --env-file .env.vm up -d postgres redis backend celery_worker celery_beat
+#
+# Differences vs. the dev compose file:
+#   * Backend listens only on the loopback (127.0.0.1) so Tailscale Funnel is
+#     the sole public entry point — no surprise 0.0.0.0 exposure.
+#   * Postgres + Redis drop their host port mappings entirely; they're reached
+#     over the internal bunchly_net bridge and never need a host port.
+#   * The frontend service is omitted from the `up` command (Vercel hosts it).
+
+services:
+  postgres:
+    # !reset clears the host port mapping inherited from docker-compose.yml.
+    ports: !reset []
+
+  redis:
+    ports: !reset []
+
+  backend:
+    # Bind explicitly to the loopback. Funnel proxies 127.0.0.1:${BACKEND_PORT}
+    # so we deliberately keep this off 0.0.0.0.
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8200}:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod

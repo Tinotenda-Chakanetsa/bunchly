@@ -1,0 +1,46 @@
+# Core
+Django==5.1.4
+djangorestframework==3.15.2
+django-environ==0.11.2
+psycopg[binary]==3.2.3
+
+# Auth
+djangorestframework-simplejwt==5.3.1
+django-cors-headers==4.6.0
+
+# Password hashing — Argon2id (RFC 9106)
+argon2-cffi==23.1.0
+
+# Multi-factor authentication (TOTP)
+django-otp==1.5.4
+qrcode[pil]==7.4.2
+
+# API docs
+drf-spectacular==0.28.0
+
+# Filtering / pagination helpers
+django-filter==24.3
+
+# Background jobs
+celery==5.4.0
+redis==5.2.1
+django-celery-beat==2.7.0
+
+# Storage
+django-storages==1.14.4
+boto3==1.35.81
+
+# Files / import-export
+openpyxl==3.1.5
+Pillow==11.0.0
+python-docx==1.1.2
+
+# Email
+resend==2.4.0
+
+# Production server
+gunicorn==23.0.0
+whitenoise==6.8.2
+
+# Structured logging
+python-json-logger==3.2.1

@@ -1,0 +1,106 @@
+# Bunchly local development stack.
+#
+# This compose file is intentionally separate from the one shipped with the
+# original backend reference: container names are project-prefixed so the two
+# stacks can coexist on the same machine without colliding on names, networks
+# or volumes.
+name: bunchly-app
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bunchly_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bunchly}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bunchly}
+      POSTGRES_DB: ${POSTGRES_DB:-bunchly}
+    volumes:
+      - bunchly_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bunchly}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [bunchly_net]
+
+  redis:
+    image: redis:7-alpine
+    container_name: bunchly_redis
+    ports:
+      - "${REDIS_PORT:-6380}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [bunchly_net]
+
+  backend:
+    build: ./backend
+    container_name: bunchly_backend
+    command: web
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - bunchly_media:/app/media
+    ports:
+      - "${BACKEND_PORT:-8001}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [bunchly_net]
+
+  celery_worker:
+    build: ./backend
+    container_name: bunchly_celery_worker
+    command: worker
+    env_file: .env
+    volumes:
+      - bunchly_media:/app/media
+    depends_on:
+      - backend
+      - redis
+    networks: [bunchly_net]
+
+  celery_beat:
+    build: ./backend
+    container_name: bunchly_celery_beat
+    command: beat
+    env_file: .env
+    depends_on:
+      - backend
+      - redis
+    networks: [bunchly_net]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: /api/v1
+    container_name: bunchly_frontend
+    restart: unless-stopped
+    ports:
+      # Default 3100 keeps us clear of Windows Hyper-V's typical
+      # ephemeral-port reservation (often grabs the 2993-3092 band,
+      # which used to break 3001 on boot). Override via FRONTEND_PORT.
+      - "${FRONTEND_PORT:-3100}:80"
+    # The nginx config resolves the backend per-request via Docker's
+    # embedded DNS (127.0.0.11), so frontend can boot before backend
+    # without crashing — but we still wait so the first user hit
+    # doesn't 502.
+    depends_on:
+      backend:
+        condition: service_started
+    networks: [bunchly_net]
+
+volumes:
+  bunchly_postgres_data:
+  bunchly_media:
+
+networks:
+  bunchly_net:
+    name: bunchly_net

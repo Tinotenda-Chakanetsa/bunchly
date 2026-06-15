@@ -1,0 +1,4 @@
+-r base.txt
+
+# Production extras
+sentry-sdk==2.19.2
