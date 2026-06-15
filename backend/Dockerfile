@@ -20,9 +20,12 @@ RUN pip install --upgrade pip && pip install -r requirements/prod.txt
 # Application code.
 COPY . .
 
-# Run as a non-root user.
+# Run as a non-root user. The chmod on entrypoint.sh re-applies the
+# executable bit, which git-on-Windows / rsync-without-chmod silently
+# drops during transfer to a Linux host.
 RUN useradd --create-home --uid 1000 bunchly \
     && mkdir -p /app/staticfiles /app/media \
+    && chmod +x /app/entrypoint.sh \
     && chown -R bunchly:bunchly /app
 USER bunchly
 
